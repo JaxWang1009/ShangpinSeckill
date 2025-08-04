@@ -52,8 +52,12 @@ rocketmq:
 
 # 秒杀配置
 seckill:
-  # 线程池最大并发数
+  # 线程池配置
   thread-pool:
+    core-size: 10
+    max-size: 50
+    queue-capacity: 100
+    keep-alive-seconds: 60
     max-concurrent: 200
   # 订单超时时间（分钟）
   order-timeout: 30

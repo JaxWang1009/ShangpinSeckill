@@ -15,6 +15,10 @@ import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.Query;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -79,7 +83,7 @@ public class SeckillServiceImpl implements SeckillService {
     @PostConstruct
     public void init() {
         stockScript = new DefaultRedisScript<>();
-        stockScript.setLocation(new ClassPathResource("lua/stock.lua"));
+        stockScript.setLocation(new ClassPathResource("scripts/stock.lua"));
         stockScript.setResultType(Long.class);
         
         log.info("秒杀服务初始化完成，线程池最大并发数: {}, 订单超时时间: {}分钟", maxConcurrent, orderTimeout);
@@ -93,15 +97,14 @@ public class SeckillServiceImpl implements SeckillService {
             
             if (keyword != null && !keyword.trim().isEmpty()) {
                 // 多字段搜索：标题、描述
-                queryBuilder.withQuery(org.springframework.data.elasticsearch.core.query.Query.matchQuery("title", keyword)
-                    .or(org.springframework.data.elasticsearch.core.query.Query.matchQuery("description", keyword)));
+                queryBuilder.withQuery(QueryBuilders.multiMatchQuery(keyword, "title", "description"));
             }
             
             // 只查询激活状态的商品
-            queryBuilder.withFilter(org.springframework.data.elasticsearch.core.query.Query.termQuery("is_active", 1));
+            queryBuilder.withFilter(QueryBuilders.termQuery("is_active", 1));
             
             // 按创建时间倒序
-            queryBuilder.withSort(org.springframework.data.elasticsearch.core.query.Sort.by("create_time").descending());
+            queryBuilder.withSort(SortBuilders.fieldSort("create_time").order(SortOrder.DESC));
             
             NativeSearchQuery searchQuery = queryBuilder.build();
             SearchHits<SeckillItem> searchHits = elasticsearchTemplate.search(searchQuery, SeckillItem.class);
