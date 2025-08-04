@@ -1,0 +1,64 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: seckill-service
+  
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/ecommerce_seckill?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 3000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+        
+  # Elasticsearch配置
+  elasticsearch:
+    rest:
+      uris: http://localhost:9200
+      connection-timeout: 5000
+      read-timeout: 5000
+
+# MyBatis配置
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.ecommerce.seckill.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# RocketMQ配置
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: seckill-producer-group
+    send-message-timeout: 3000
+  consumer:
+    group: seckill-consumer-group
+
+# 秒杀配置
+seckill:
+  # 线程池最大并发数
+  thread-pool:
+    max-concurrent: 200
+  # 订单超时时间（分钟）
+  order-timeout: 30
+
+# 日志配置
+logging:
+  level:
+    com.ecommerce.seckill: debug 

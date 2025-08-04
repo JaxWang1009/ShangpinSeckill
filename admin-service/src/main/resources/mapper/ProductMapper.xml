@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ecommerce.admin.dao.ProductMapper">
+
+    <resultMap id="BaseResultMap" type="com.ecommerce.admin.entity.Product">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="price" property="price" jdbcType="DECIMAL"/>
+        <result column="stock" property="stock" jdbcType="INTEGER"/>
+        <result column="category_id" property="categoryId" jdbcType="BIGINT"/>
+        <result column="image" property="image" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="create_by" property="createBy" jdbcType="VARCHAR"/>
+        <result column="update_by" property="updateBy" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, description, price, stock, category_id, image, status, create_time, update_time, create_by, update_by
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM product
+        <where>
+            <if test="categoryId != null">
+                AND category_id = #{categoryId}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM product
+        <where>
+            <if test="categoryId != null">
+                AND category_id = #{categoryId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM product
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.ecommerce.admin.entity.Product" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO product (
+            name, description, price, stock, category_id, image, status, create_time, update_time, create_by, update_by
+        ) VALUES (
+            #{name}, #{description}, #{price}, #{stock}, #{categoryId}, #{image}, #{status}, #{createTime}, #{updateTime}, #{createBy}, #{updateBy}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.ecommerce.admin.entity.Product">
+        UPDATE product
+        SET name = #{name},
+            description = #{description},
+            price = #{price},
+            stock = #{stock},
+            category_id = #{categoryId},
+            image = #{image},
+            status = #{status},
+            update_time = #{updateTime},
+            update_by = #{updateBy}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStock">
+        UPDATE product
+        SET stock = #{stock},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM product WHERE id = #{id}
+    </delete>
+
+</mapper> 
